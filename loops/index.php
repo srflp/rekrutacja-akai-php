@@ -16,7 +16,7 @@
 //
 // And should I print a total of 11 numbers when the number is a multiple of 10?
 // (1 in black, 10 in red?)
-// I did so, but it looks to me like as an unwanted behavior.
+// I did so, but it looks to me like an unwanted behavior.
 // "If the number is a multiple of 10, repeat it 10 times in the same line in red, instead of writing the number" sounds clear
 //
 // I think that this whole instruction should be improved, so that people
