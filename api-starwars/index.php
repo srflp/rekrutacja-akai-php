@@ -33,33 +33,33 @@ class SWApiClient {
     );
   }
 
-  public function getAllVehicles() {
-    $vehicle_arr = [];
+  public function getAllStarships() {
+    $starship_arr = [];
 
     do {
-      $res = $this->request($resource ?? 'vehicles');
+      $res = $this->request($resource ?? 'starships');
       $resource = $res->next;
-      foreach ($res->results as $vehicle) {
-        foreach ($vehicle->pilots as $pilot_index => $pilot) {
+      foreach ($res->results as $starship) {
+        foreach ($starship->pilots as $pilot_index => $pilot) {
           $res_pilot = $this->request($pilot);
-          $vehicle->pilots[$pilot_index] = [
+          $starship->pilots[$pilot_index] = [
             'name' => $res_pilot->name,
             'species' => [],
           ];
           foreach ($res_pilot->species as $species) {
             $res_species = $this->request($species);
-            $vehicle->pilots[$pilot_index]['species'][] = $res_species->name;
+            $starship->pilots[$pilot_index]['species'][] = $res_species->name;
           }
         }
-        foreach ($vehicle->films as $film_index => $film) {
+        foreach ($starship->films as $film_index => $film) {
           $res_film = $this->request($film);
-          $vehicle->films[$film_index] = $res_film->title;
+          $starship->films[$film_index] = $res_film->title;
         }
-        $vehicle_arr[] = $vehicle;
+        $starship_arr[] = $starship;
       }
     } while($res->next);
 
-    return $vehicle_arr;
+    return $starship_arr;
   }
 
 }
@@ -73,7 +73,7 @@ class MyDOM {
   }
 
   public function createElement($parent, $tag, $content = '', $attributes = []) {
-    $this_el = $this->dom->createElement($tag, $content);
+    $this_el = $this->dom->createElement($tag, htmlspecialchars($content));
     foreach ($attributes as $name => $value) {
       $attr = $this->dom->createAttribute($name);
       $attr->value = $value;
@@ -103,32 +103,34 @@ class MyDOM {
 
 // View logic:
 $client = new SWApiClient();
-$vehicles = $client->getAllVehicles();
+$starships = $client->getAllStarships();
 
 $dom = new MyDOM();
 
 $ul_el = $dom->createElement(null, 'ul');
-foreach ($vehicles as $vehicle) {
+foreach ($starships as $starship) {
   $pilots = [];
-  foreach ($vehicle->pilots as $pilot) {
-    $species = implode(', ', $pilot['species']);
+  foreach ($starship->pilots as $pilot) {
+    $species = implode(', ', $pilot['species']) ?: 'unknown species';
     $pilots[] = "{$pilot['name']} ({$species})";
   }
   $pilots = implode(', ', $pilots) ?: 'none';
-  $films = implode(', ', $vehicle->films);
+  $films = implode(', ', $starship->films);
   $li_el = $dom->createElement($ul_el, 'li');
   $p_el = $dom->createElements($li_el, 'p', [
-    "Name: {$vehicle->name}",
-    "Model: {$vehicle->model}",
-    "Manufacturer: {$vehicle->manufacturer}",
-    "Cost: {$vehicle->cost_in_credits}",
-    "Length: {$vehicle->length}",
-    "Max atmosphering speed: {$vehicle->max_atmosphering_speed}",
-    "Crew: {$vehicle->crew}",
-    "Passengers: {$vehicle->passengers}",
-    "Cargo capacity: {$vehicle->cargo_capacity}",
-    "Consumables: {$vehicle->consumables}",
-    "Vehicle class: {$vehicle->vehicle_class}",
+    "Name: {$starship->name}",
+    "Model: {$starship->model}",
+    "Starship class: {$starship->starship_class}",
+    "Manufacturer: {$starship->manufacturer}",
+    "Cost: {$starship->cost_in_credits} credits",
+    "Length: {$starship->length} m",
+    "Crew: {$starship->crew}",
+    "Passengers: {$starship->passengers}",
+    "Max atmosphering speed: {$starship->max_atmosphering_speed}",
+    "Hyperdrive rating: {$starship->hyperdrive_rating}",
+    "MGLT: {$starship->MGLT}",
+    "Cargo capacity: {$starship->cargo_capacity}",
+    "Consumables: {$starship->consumables}",
     "Pilots: {$pilots}",
     "Films: {$films}",
   ]);
